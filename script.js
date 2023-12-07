@@ -5,11 +5,12 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    var mouseX = 0, mouseY = 0;
+    var mouseX, mouseY;
 
-    const numPoints = 1000000/10;
+    const numPoints = 1000000/1000;
     const pointSize = 2; //thickness of the points, adjust for visibility
     const points = generateRandomPoints(numPoints);
+    renderPoints(points, pointSize);
 
     function generateRandomPoints(numPoints) {
         const points = new Float32Array(numPoints * 2);
@@ -23,17 +24,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function findClosestPoint(mouseX, mouseY, points) {
-        console.log("mouseX: ", mouseX)
-        console.log("mouseY: ", mouseY)
         let closestPoint = null;
         let minDistance = Number.MAX_VALUE;
-        console.log("minDistance: ", minDistance)
 
         for (let i = 0; i < points.length; i += 2) {
             const x = points[i];
             const y = points[i + 1];
             const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
-            console.log("distance: ", distance)
             if (distance < minDistance) {
                 minDistance = distance;
                 closestPoint = { x, y };
@@ -45,11 +42,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderPoints(points, pointSize) {
         ctx.fillStyle = '#000';
         const closestPoint = findClosestPoint(mouseX, mouseY, points);
+
+        if (closestPoint == null) {
+            console.log('no closest point found');
+        }
         for (let i = 0; i < points.length; i += 2) {
-            if (closestPoint == null) {
-                console.log('no closest point found')
-            }
-            else if (points[i] === closestPoint.x && points[i + 1] === closestPoint.y) {
+            if (closestPoint && (points[i] === closestPoint.x && points[i + 1] === closestPoint.y)) {
                 ctx.fillStyle = '#f00';
             } else {
                 ctx.fillStyle = '#000';
