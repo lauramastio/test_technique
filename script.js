@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('no closest point found');
         }
         for (let i = 0; i < points.length; i += 2) {
-            if (closestPoint && (points[i] === closestPoint.x && points[i + 1] === closestPoint.y)) {
+            if (points[i] === closestPoint?.x && points[i + 1] === closestPoint?.y) {
                 ctx.fillStyle = '#f00';
             } else {
                 ctx.fillStyle = '#000';
