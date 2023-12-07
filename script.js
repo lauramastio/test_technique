@@ -7,9 +7,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var mouseX, mouseY;
 
-    const numPoints = 1000000/1000;
-    const pointSize = 2; //thickness of the points, adjust for visibility
+    const numPoints = 20;
+    const pointSize = 10; //thickness of the points, adjust for visibility
+    const bounds = new Rectangle(0, 0, canvas.width, canvas.height);
+    const quadtree = new QuadtreeNode(bounds);
+
     const points = generateRandomPoints(numPoints);
+    console.log(quadtree);
     renderPoints(points, pointSize);
 
     function generateRandomPoints(numPoints) {
@@ -18,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 0; i < numPoints * 2; i += 2) {
             points[i] = Math.random() * canvas.width;
             points[i + 1] = Math.random() * canvas.height;
+            quadtree.insert([points[i], points[i + 1]]);
         }
 
         return points;
