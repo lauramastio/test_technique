@@ -7,13 +7,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var mouseX, mouseY;
 
-    const numPoints = 20;
+    const numPoints = 1000;
     const pointSize = 10; //thickness of the points, adjust for visibility
     const bounds = new Rectangle(0, 0, canvas.width, canvas.height);
     const quadtree = new QuadtreeNode(bounds);
 
     const points = generateRandomPoints(numPoints);
-    console.log(quadtree);
     renderPoints(points, pointSize);
 
     function generateRandomPoints(numPoints) {
@@ -28,25 +27,40 @@ document.addEventListener('DOMContentLoaded', function () {
         return points;
     }
 
-    function findClosestPoint(mouseX, mouseY, points) {
+    function findClosestPoint(mouseX, mouseY, quadtree) {
         let closestPoint = null;
         let minDistance = Number.MAX_VALUE;
 
-        for (let i = 0; i < points.length; i += 2) {
-            const x = points[i];
-            const y = points[i + 1];
-            const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestPoint = { x, y };
+        function search(node) {
+            if (node == null) {
+                return closestPoint;
+            }
+
+            if (node.points.length > 0) {
+                const x = node.points[0];
+                const y = node.points[1];
+                const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPoint = { x, y };
+                }
+            }
+
+            if (node.subdivided) {
+                search(node.northwest);
+                search(node.northeast);
+                search(node.southwest);
+                search(node.southeast);
             }
         }
+
+        search(quadtree);
         return closestPoint;
     }
 
     function renderPoints(points, pointSize) {
         ctx.fillStyle = '#000';
-        const closestPoint = findClosestPoint(mouseX, mouseY, points);
+        const closestPoint = findClosestPoint(mouseX, mouseY, quadtree);
 
         if (closestPoint == null) {
             console.log('no closest point found');

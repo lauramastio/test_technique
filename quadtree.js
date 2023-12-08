@@ -19,7 +19,7 @@ class Rectangle {
 class QuadtreeNode {
     constructor(boundary) {
         this.boundary = boundary;
-        this.capacity = 4;
+        this.capacity = 1;
         this.points = [];
         this.subdivided = false; // is the node a leaf
         this.northwest = null;
@@ -34,7 +34,7 @@ class QuadtreeNode {
         }
 
         if (this.points.length < this.capacity) {
-            this.points.push(point); // Add point to the current node
+            this.points = point; // Add point to the current node
             return true;
         }
 
