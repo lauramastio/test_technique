@@ -7,49 +7,62 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var mouseX, mouseY;
 
-    const numPoints = 20;
-    const pointSize = 10; //thickness of the points, adjust for visibility
+    const NUM_POINTS = 1000000;
+    const POINT_SIZE = 1; //thickness of the points, adjust for visibility
     const bounds = new Rectangle(0, 0, canvas.width, canvas.height);
     const quadtree = new QuadtreeNode(bounds);
 
-    const points = generateRandomPoints(numPoints);
-    console.log(quadtree);
-    renderPoints(points, pointSize);
+    const points = populateQuadTree();
+    let lastClosestPoint = renderPoints(points);
 
-    function generateRandomPoints(numPoints) {
-        const points = new Float32Array(numPoints * 2);
+    function populateQuadTree() {
+        const points = new Int32Array(NUM_POINTS * 2);
 
-        for (let i = 0; i < numPoints * 2; i += 2) {
-            points[i] = Math.random() * canvas.width;
-            points[i + 1] = Math.random() * canvas.height;
-            quadtree.insert([points[i], points[i + 1]]);
+        for (let i = 0; i < NUM_POINTS * 2; i += 2) {
+            points[i] = Math.floor(Math.random() * canvas.width);
+            points[i + 1] = Math.floor(Math.random() * canvas.height);
+            quadtree.insert({x: points[i], y: points[i + 1]});
         }
 
         return points;
     }
 
-    function findClosestPoint(mouseX, mouseY, points) {
+    function findClosestPoint(mouseX, mouseY, quadtree) {
         let closestPoint = null;
         let minDistance = Number.MAX_VALUE;
 
-        for (let i = 0; i < points.length; i += 2) {
-            const x = points[i];
-            const y = points[i + 1];
-            const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestPoint = { x, y };
+        function search(node) {
+            if (node == null) {
+                return closestPoint;
+            }
+
+            if (node.point.x !== undefined && node.point.y !== undefined) {
+                const x = node.point.x;
+                const y = node.point.y;
+                const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPoint = { x, y };
+                }
+            }
+
+            if (node.hasChild) {
+                search(node.northwest);
+                search(node.northeast);
+                search(node.southwest);
+                search(node.southeast);
             }
         }
+        search(quadtree);
         return closestPoint;
     }
 
-    function renderPoints(points, pointSize) {
+    function renderPoints(points) {
         ctx.fillStyle = '#000';
-        const closestPoint = findClosestPoint(mouseX, mouseY, points);
+        const closestPoint = findClosestPoint(mouseX, mouseY, quadtree);
 
         if (closestPoint == null) {
-            console.log('no closest point found');
+            console.error('No closest point found.');
         }
         for (let i = 0; i < points.length; i += 2) {
             if (points[i] === closestPoint?.x && points[i + 1] === closestPoint?.y) {
@@ -57,15 +70,27 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 ctx.fillStyle = '#000';
             }
-            ctx.fillRect(points[i], points[i + 1], pointSize, pointSize);
+            ctx.fillRect(points[i], points[i + 1], POINT_SIZE, POINT_SIZE);
         }
+        return closestPoint;
+    }
+
+    function rerenderPoints() {
+        if (lastClosestPoint) {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(lastClosestPoint.x, lastClosestPoint.y, POINT_SIZE, POINT_SIZE);
+        }
+        ctx.fillStyle = '#f00';
+        const closestPoint = findClosestPoint(mouseX, mouseY, quadtree);
+        ctx.fillRect(closestPoint.x, closestPoint.y, POINT_SIZE, POINT_SIZE);
+        lastClosestPoint = closestPoint;
+
     }
 
     canvas.addEventListener('mousemove', function(event) {
         mouseX = event.clientX;
         mouseY = event.clientY;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        renderPoints(points, pointSize);
+        rerenderPoints();
     });
 
 });

@@ -8,10 +8,10 @@ class Rectangle {
 
     contains(point) {
         return (
-            point[0] >= this.x &&
-            point[0] <= this.x + this.width &&
-            point[1] >= this.y &&
-            point[1] <= this.y + this.height
+            point.x >= this.x &&
+            point.x <= this.x + this.width &&
+            point.y >= this.y &&
+            point.y <= this.y + this.height
         );
     }
 }
@@ -20,8 +20,8 @@ class QuadtreeNode {
     constructor(boundary) {
         this.boundary = boundary;
         this.capacity = 4;
-        this.points = [];
-        this.subdivided = false; // is the node a leaf
+        this.point = {x: undefined, y: undefined};
+        this.hasChild = false;
         this.northwest = null;
         this.northeast = null;
         this.southwest = null;
@@ -33,12 +33,12 @@ class QuadtreeNode {
             return false; // Point is outside the Quadtree's boundary
         }
 
-        if (this.points.length < this.capacity) {
-            this.points.push(point); // Add point to the current node
+        if (this.point.x === undefined && this.point.y === undefined) {
+            this.point = point; // Add point to the current node
             return true;
         }
 
-        if (!this.subdivided) {
+        if (!this.hasChild) {
             this.subdivide(); // Subdivide the node if not already done
         }
 
@@ -68,6 +68,6 @@ class QuadtreeNode {
         this.southwest = new QuadtreeNode(swBoundary, this.capacity);
         this.southeast = new QuadtreeNode(seBoundary, this.capacity);
 
-        this.subdivided = true;
+        this.hasChild = true;
     }
 }
