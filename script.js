@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var mouseX, mouseY;
 
-    const NUM_POINTS = 1000000;
+    const NUM_POINTS = 1000000; //number of points to generate
     const POINT_SIZE = 1; //thickness of the points, adjust for visibility
     const bounds = new Rectangle(0, 0, canvas.width, canvas.height);
     const quadtree = new QuadtreeNode(bounds);
